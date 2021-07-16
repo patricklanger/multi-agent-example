@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ant Colony</title>
+    <link rel="icon" type="image/xml+svg" href="https://www.svgrepo.com/show/272349/ant.svg" sizes="any">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
@@ -15,7 +16,7 @@
                 $.each(data, function() {
                     var tbl_row = "";
                     $.each(this, function(k , v) {
-                        tbl_row += "<td style='width:5px; height:5px; background: "+v+";'></td>";
+                        tbl_row += "<td style='width:20px; height:20px; background: "+v+";'></td>";
                     });
                     tbl_body += "<tr>"+tbl_row+"</tr>";
                 });

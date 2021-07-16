@@ -9,7 +9,7 @@ STATE_ONE = "STATE_ONE"
 STATE_TWO = "STATE_TWO"
 STATE_THREE = "STATE_THREE"
 
-SPEED = 0.2  # ms / step
+SPEED = 0.1  # ms / step
 
 
 class AntState(State):
@@ -31,9 +31,8 @@ class AntState(State):
                         self.set_next_state(STATE_TWO)
                         return "already set new state"
                 else:
-                    dirs = ["north", "east", "south", "west"]
-                    dirs.remove(move_to)
-                    self.agent.actions = random.sample(dirs,2)
+                    n, e, s, w = ("north", "east", "south", "west")
+                    self.agent.actions = random.choice([[n, e], [e, s], [s, w], [w, n]])
         except Exception as e:
             print(e)
 
@@ -57,7 +56,7 @@ class BeBorn(State):
         self.agent.position = {"x": position[0], "y": position[1]}
         self.agent.home = {"x": position[0], "y": position[1]}
 
-        time.sleep(1)
+        time.sleep(0.1)
 
         self.set_next_state(STATE_TWO)
 

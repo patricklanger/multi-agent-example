@@ -1,6 +1,7 @@
 from ant_agent import AntAgent
 import time
 from flask import Flask, render_template, request, Response
+from gevent.pywsgi import WSGIServer
 import json
 from world import World
 
@@ -9,7 +10,7 @@ AGENT_A_USERNAME = "agent-a"
 AGENT_A_PASSWORD = "agent-a1234"
 XMPP_SERVER = "192.168.178.22"
 
-world = World(70, 30, 10, 5)
+world = World(70, 25, 20, 5)
 agents = {}
 
 
@@ -45,7 +46,12 @@ if __name__ == "__main__":
     def show_view():
         return render_template("view.html")
 
-    app.run()
+    # slow server
+    # app.run()
+
+    # Fast server
+    http_server = WSGIServer(('127.0.0.1', 5000), app)
+    http_server.serve_forever()
 
     while True:
         try:
