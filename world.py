@@ -1,5 +1,5 @@
 import random as r
-
+from ant import Ant
 
 def modify_part_of_world(world, color, center_xcor, center_ycor, size):
     radius = int(size / 2)
@@ -18,12 +18,12 @@ class World():
         self.height = world_height
         self.center_xcor = int(self.width / 2)
         self.center_ycor = int(self.height / 2)
-        print(self.center_xcor, self.center_ycor)
         self.empty_field = "#5D8233"
         self.ant_field = "#284E78"
         self.loaded_ant_field = "#3E215D"
         self.home_field = "#7F8B52"
         self.food_field = "#ECD662"
+        self.ants = {}
 
         # random_world = [[random.choice([color_food, color_home, color_ant, color_empty]) for i in range(world_length)]
         #                 for j in range(world_height)]
@@ -40,8 +40,8 @@ class World():
         # Create Food
         world_with_food = world_with_anthome
         food_radius = int(size_of_leftover_food / 2)
-        distance_to_center = food_radius + 15
-        distance_to_wall = food_radius + 3
+        distance_to_center = food_radius + 5
+        distance_to_wall = food_radius + 2
         coordinates = [(x, y) for x in range(self.width) for y in range(self.height)]
         not_possible_coordinates = []
         for (x, y) in coordinates:
@@ -63,5 +63,61 @@ class World():
                 # print(f"Build food at: {xcor}, {ycor}")
             except IndexError:
                 print(f"Cant build food at: {xcor}, {ycor}")
+
+        # World with an anthome and foodplaces is generated
         self.world_without_ants = world_with_food
         self.world_with_ants = [row.copy() for row in world_with_food]  # copy to get a new reference
+
+    def create_ant(self, name):
+        self.ants[name] = Ant((self.center_xcor, self.center_ycor))
+        answer = {"position": (self.ants[name].xcor, self.ants[name].ycor)}
+        return answer
+
+    def get_view(self):
+        world_with_ants = [row.copy() for row in self.world_without_ants]
+        for ant in self.ants.values():
+            world_with_ants[ant.ycor][ant.xcor] = ant.color
+        return world_with_ants
+
+    def move_ant(self, name, direction):
+        ant = self.ants[name]
+        if direction == "north":
+            x = ant.xcor
+            y = ant.ycor - 1
+        elif direction == "east":
+            x = ant.xcor + 1
+            y = ant.ycor
+        elif direction == "south":
+            x = ant.xcor
+            y = ant.ycor + 1
+        elif direction == "west":
+            x = ant.xcor - 1
+            y = ant.ycor
+
+        answer = {
+            "position": (ant.xcor, ant.ycor),
+            "moved": False,
+            "found_food": False,
+            "delivered_food": False
+        }
+        if 0 >= x or x >= self.width - 1 or 0 >= y or y >= self.height - 1:
+            answer["moved"] = False
+        elif (ant.xcor, ant.ycor) == (ant.xcor_home, ant.ycor_home):
+            ant.search_mode()
+            answer["position"] = ant.xcor, ant.ycor = (x, y)
+            answer["moved"] = True
+            answer["delivered_food"] = True
+        elif self.world_without_ants[y][x] == self.food_field:
+            ant.carry_mode()
+            answer["position"] = ant.xcor, ant.ycor = (x, y)
+            answer["moved"] = True
+            answer["found_food"] = True
+            self.world_without_ants[y][x] = self.empty_field
+        else:
+            answer["position"] = ant.xcor, ant.ycor = (x, y)
+            answer["moved"] = True
+
+        return answer
+
+
+
