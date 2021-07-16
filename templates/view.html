@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ant Colony</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<p id="world"></p>
+<script>
+    $(function() {
+        function refresh() {
+            $.getJSON('http://127.0.0.1:5000/world' , function(data) {
+                var tbl_body = "";
+                $.each(data, function() {
+                    var tbl_row = "";
+                    $.each(this, function(k , v) {
+                        tbl_row += "<td style='width:5px; height:5px; background: "+v+";'></td>";
+                    });
+                    tbl_body += "<tr>"+tbl_row+"</tr>";
+                });
+                $("#world").html("<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">"+tbl_body+"</table>");
+            });
+            setTimeout(refresh, 300);
+        }
+        refresh();
+    });
+</script>
+</body>
+</html>
