@@ -4,7 +4,7 @@ from gevent.pywsgi import WSGIServer
 from ant_agent import AntAgent
 from world import World
 
-world = World(world_width=70, world_height=25, number_of_leftover_food=20, size_of_leftover_food=5)
+world = World(world_width=70, world_height=25, number_of_leftover_food=10, size_of_leftover_food=5)
 
 user_letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
 XMPP_SERVER = "192.168.178.22"
@@ -25,6 +25,11 @@ if __name__ == "__main__":
     @app.route("/create_ant")
     def create_ant():
         return world.create_ant(request.args.get("name")), 200
+
+    @app.route("/get_friends")
+    def return_agent_addresses():
+        addresses = [f"{agent.name}@{XMPP_SERVER}" for agent in agents.values()]
+        return json.dumps(addresses), 200
 
     @app.route("/move")
     def ant_moves():

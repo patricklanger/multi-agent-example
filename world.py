@@ -41,16 +41,14 @@ class World():
         # Create Food
         world_with_food = world_with_anthome
         food_radius = int(size_of_leftover_food / 2)
-        distance_to_center = food_radius + 5
+        distance_to_center = food_radius + 10
         distance_to_wall = food_radius + 2
         coordinates = [(x, y) for x in range(self.width) for y in range(self.height)]
         not_possible_coordinates = []
         for (x, y) in coordinates:
             if x < distance_to_wall or x > (self.width - distance_to_wall) or y < distance_to_wall or y > (self.height - distance_to_wall):
                 not_possible_coordinates.append((x, y))
-            elif x in list(range(self.center_xcor - distance_to_center, self.center_xcor + distance_to_center)):
-                not_possible_coordinates.append((x, y))
-            elif y in list(range(self.center_ycor - distance_to_center, self.center_ycor + distance_to_center)):
+            elif x in list(range(self.center_xcor - distance_to_center, self.center_xcor + distance_to_center)) and y in list(range(self.center_ycor - distance_to_center, self.center_ycor + distance_to_center)):
                 not_possible_coordinates.append((x, y))
         possible_coordinates = [(x, y) for (x, y) in coordinates if (x, y) not in not_possible_coordinates]
         for i in range(number_of_leftover_food):
