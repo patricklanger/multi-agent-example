@@ -1,16 +1,13 @@
-from ant_agent import AntAgent
-import time
+import json
 from flask import Flask, render_template, request, Response
 from gevent.pywsgi import WSGIServer
-import json
+from ant_agent import AntAgent
 from world import World
 
-user_letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
-AGENT_A_USERNAME = "agent-a"
-AGENT_A_PASSWORD = "agent-a1234"
-XMPP_SERVER = "192.168.178.22"
+world = World(world_width=70, world_height=25, number_of_leftover_food=20, size_of_leftover_food=5)
 
-world = World(70, 25, 20, 5)
+user_letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+XMPP_SERVER = "192.168.178.22"
 agents = {}
 
 
@@ -53,12 +50,4 @@ if __name__ == "__main__":
     http_server = WSGIServer(('127.0.0.1', 5000), app)
     http_server.serve_forever()
 
-    while True:
-        try:
-            time.sleep(1)
-            print("pow")
-        except KeyboardInterrupt:
-            [agent.stop() for agent in agents]
-            break
-    print("Ants finished")
 

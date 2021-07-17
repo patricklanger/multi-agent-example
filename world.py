@@ -1,6 +1,7 @@
 import random as r
 from ant import Ant
 
+
 def modify_part_of_world(world, color, center_xcor, center_ycor, size):
     radius = int(size / 2)
     top = int(center_xcor + radius)
