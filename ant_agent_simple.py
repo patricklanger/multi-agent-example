@@ -1,4 +1,5 @@
 import time
+import asyncio
 import requests
 import random
 import json
@@ -11,7 +12,7 @@ STATE_ONE = "STATE_ONE"
 STATE_TWO = "STATE_TWO"
 STATE_THREE = "STATE_THREE"
 
-SPEED = 0.01  # ms / step
+SPEED = 20  # ms / step
 
 
 def calc_distance(start, goal):
@@ -44,22 +45,6 @@ class AntState(State):
         except Exception as e:
             print(e)
 
-    async def inform_friends(self, food_pos):
-        try:
-            res = requests.get(f"http://127.0.0.1:5000/get_friends")
-            if int(res.status_code) == 200:
-                res = [friend for friend in json.loads(res.text) if self.agent.name not in friend]
-                print(res)
-                for friend in res:
-                    print(f"send to {friend}")
-                    msg = Message(to=friend)     # Instantiate the message
-                    msg.set_metadata("performative", "inform")  # Set the "inform" FIPA performative
-                    msg.body = json.dumps(self.agent.position)  # Set the message content
-                    await self.send(msg)
-        except Exception as e:
-            print(f"{self.agent.name} cant communicate...")
-            print(e)
-
     def decide_next_move(self, goal):
         print(f"{self.agent.name} has a goal {goal}")
         pos = self.agent.position
@@ -83,40 +68,34 @@ class AntBehaviour(FSMBehaviour):
 
 class BeBorn(State):
     async def run(self):
-        # print(f"An ant is born! Its name is {self.agent.name}.")
         res = requests.get(f"http://127.0.0.1:5000/create_ant?name={self.agent.name}")
         position = json.loads(res.text)["position"]
         self.agent.position = {"x": position[0], "y": position[1]}
         self.agent.home = {"x": position[0], "y": position[1]}
-        self.agent.good_food_place = {"x": 99999, "y": 99999}
+        self.agent.good_food_place = False
         self.agent.carry_food = False
 
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
         self.set_next_state(STATE_TWO)
 
 
 class Searching(AntState):
     async def run(self):
-        # print(f"{self.agent.jid} is searching for food...")
-        time.sleep(SPEED)
-        if self.agent.good_food_place == self.agent.position:
-            self.agent.good_food_place = {"x": 99999, "y": 99999}
-        if calc_distance(self.agent.position, self.agent.good_food_place) < 30:
+        await asyncio.sleep(SPEED)
+        if self.agent.good_food_place:
             move_to = self.decide_next_move(self.agent.good_food_place)
         else:
             move_to = random.choice(self.agent.actions)
         self.send_move_request(move_to)
         if self.agent.carry_food:
             self.set_next_state(STATE_THREE)
-            print("send a good place to my friends", self.next_state)
-            await self.inform_friends(self.agent.good_food_place)
             return
         self.set_next_state(STATE_TWO)
 
 
 class CarryHome(AntState):
     async def run(self):
-        time.sleep(SPEED)
+        await asyncio.sleep(SPEED)
         move_to = self.decide_next_move(self.agent.home)
         self.send_move_request(move_to)
         if not self.agent.carry_food:
@@ -126,28 +105,8 @@ class CarryHome(AntState):
         self.set_next_state(STATE_THREE)
 
 
-class ReceiveMsg(CyclicBehaviour):
-    async def run(self):
-        # print(f"{self.agent.name} listening..")
-        msg = await self.receive(timeout=1)
-        if msg:
-            print(f"{self.agent.name} Hey I got a msg: {msg.body}")
-            body = json.loads(msg.body)
-            acceptable_distance = 30
-            distance_to_new_food_source = calc_distance(self.agent.position, body)
-            if distance_to_new_food_source < calc_distance(self.agent.position, self.agent.good_food_place) \
-                    and distance_to_new_food_source <= acceptable_distance:
-                self.agent.good_food_place = body
-                print(f"{self.agent.name} Nice ill save it")
-
-
 class AntAgent(Agent):
     async def setup(self):
-        print(f"{self.name} started")
-
-        # self.web.start(hostname="127.0.0.1", port=10000)
-        # print(self.web.server, self.web.port)
-
         fsm = AntBehaviour()
         fsm.add_state(name=STATE_ONE, state=BeBorn(), initial=True)
         fsm.add_state(name=STATE_TWO, state=Searching())
@@ -158,10 +117,5 @@ class AntAgent(Agent):
         fsm.add_transition(source=STATE_THREE, dest=STATE_TWO)
         fsm.add_transition(source=STATE_THREE, dest=STATE_THREE)
         self.add_behaviour(fsm)
-
-        cycl = ReceiveMsg()
-        template = Template()
-        template.set_metadata("performative", "inform")  # Set the "inform" FIPA performative
-        self.add_behaviour(cycl, template)
 
 

@@ -4,15 +4,15 @@ from gevent.pywsgi import WSGIServer
 from ant_agent import AntAgent
 from world import World
 
-world = World(world_width=70, world_height=25, number_of_leftover_food=10, size_of_leftover_food=5)
+world = World(world_width=70, world_height=50, number_of_leftover_food=5, size_of_leftover_food=10)
 
-user_letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
-XMPP_SERVER = "192.168.178.22"
+user_letters = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+XMPP_SERVER = "192.168.178.22" #  "im.koderoot.net"
 agents = {}
 
 
 def produce_agent(user_letter):
-    agents[user_letter] = AntAgent(f"agent-{user_letter}@{XMPP_SERVER}", f"agent-{user_letter}1234")
+    agents[user_letter] = AntAgent(f"agent-{user_letter}@{XMPP_SERVER}", f"agent-{user_letter}1234", verify_security=False)
     agents[user_letter].start()
 
 
