@@ -54,7 +54,6 @@ class AntState(State):
                 if res["found_food"]:
                     self.agent.carry_food = True
                     self.agent.good_food_place = (res["position"][0], res["position"][1])
-                    print(f"{self.agent.name} found food {self.agent.carry_food}")
                 if res["delivered_food"]:
                     self.agent.carry_food = False
             else:
@@ -66,7 +65,6 @@ class AntState(State):
         try:
             res = requests.get(f"http://127.0.0.1:5000/get_friends")
             res = [friend for friend in json.loads(res.text) if self.agent.name not in friend]
-            print(res)
             for friend in res:
                 msg = Message(to=friend)     # Instantiate the message
                 msg.body = json.dumps(self.agent.position)  # Set the message content
