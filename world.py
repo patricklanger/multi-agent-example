@@ -13,7 +13,21 @@ def modify_part_of_world(world, color, center_xcor, center_ycor, size):
     return world
 
 
-class World():
+def distance_to(x_one, y_one, x_two, y_two):
+    """
+    Calculates the distance from (x_one, y_one) to (x_two, y_two)
+    :param x_one:
+    :param y_one:
+    :param x_two:
+    :param y_two:
+    :return: the distance
+    """
+    x_dist = abs(x_one - x_two)
+    y_dist = abs(y_one - y_two)
+    return x_dist + y_dist
+
+
+class World:
     def __init__(self, world_width, world_height, number_of_leftover_food, size_of_leftover_food):
         self.width = world_width
         self.height = world_height
@@ -117,6 +131,20 @@ class World():
             answer["moved"] = True
 
         return answer
+
+    def get_reachable_friends(self, name):
+        """
+        Returns ant names nearby the requesting ant.
+        :param name:
+        :return: list of ant names
+        """
+        distance_to_be_reachable = 25
+        ant = self.ants[name]
+        reachable_friends = [friend for friend in self.ants
+                             if 3 < distance_to(self.ants[friend].xcor,
+                                                self.ants[friend].ycor,
+                                                ant.xcor, ant.ycor) < distance_to_be_reachable]
+        return reachable_friends
 
 
 
